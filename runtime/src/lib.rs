@@ -11,7 +11,11 @@ use pallet_grandpa::{
 };
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
+use sp_core::{
+	crypto::KeyTypeId, OpaqueMetadata,
+	H160, H256, U256
+};
+
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
@@ -19,8 +23,10 @@ use sp_runtime::{
 	},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature,
+	ConsensusEngineId,
 };
-use sp_std::prelude::*;
+// use sp_std::prelude::*;
+use sp_std::{prelude::*, str::FromStr};
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -30,6 +36,7 @@ pub use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{
 		ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness, StorageInfo,
+		FindAuthor,
 	},
 	weights::{
 		constants::{
@@ -289,6 +296,64 @@ impl pallet_collectibles::Config for Runtime {
     type MaximumOwned = ConstU32<100>;
 }
 
+mod precompiles;
+pub use precompiles::{
+	FrontierPrecompiles,
+};
+
+use pallet_evm::{
+	Account as EVMAccount, EnsureAddressTruncated, FeeCalculator, HashedAddressMapping, Runner,
+	EnsureAddressNever, EnsureAddressRoot, SubstrateBlockHashMapping
+};
+
+pub struct FixedGasPrice;
+impl FeeCalculator for FixedGasPrice {
+	fn min_gas_price() -> (U256, Weight) {
+		// Return some meaningful gas price and weight
+		(1_000_000_000u128.into(), Weight::from_ref_time(7u64))
+	}
+}
+
+pub struct FindAuthorTruncated;
+impl FindAuthor<H160> for FindAuthorTruncated {
+	fn find_author<'a, I>(_digests: I) -> Option<H160>
+	where
+		I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
+	{
+		Some(H160::from_str("1234500000000000000000000000000000000000").unwrap())
+		// Some(H160::random())
+		// None
+	}
+}
+
+parameter_types! {
+	pub BlockGasLimit: U256 = U256::max_value();
+	pub WeightPerGas: Weight = Weight::from_ref_time(20_000);
+	pub PrecompilesValue: FrontierPrecompiles<Runtime> = FrontierPrecompiles::<_>::new();
+}
+
+impl pallet_evm::Config for Runtime {
+	type FeeCalculator = FixedGasPrice;
+	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
+	type WeightPerGas = WeightPerGas;
+	type BlockHashMapping = SubstrateBlockHashMapping<Self>;
+	type CallOrigin = EnsureAddressRoot<AccountId>;
+	type WithdrawOrigin = EnsureAddressNever<AccountId>;
+	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+	type Currency = Balances;
+	type RuntimeEvent = RuntimeEvent;
+	type Runner = pallet_evm::runner::stack::Runner<Self>;
+	type PrecompilesType = FrontierPrecompiles<Self>;
+	type PrecompilesValue = PrecompilesValue;
+	type ChainId = EVMChainId;
+	type OnChargeTransaction = ();
+	type OnCreate = ();
+	type BlockGasLimit = BlockGasLimit;
+	type FindAuthor = FindAuthorTruncated;
+}
+
+impl pallet_evm_chain_id::Config for Runtime {}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub struct Runtime
@@ -308,6 +373,8 @@ construct_runtime!(
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
 		Collectibles: pallet_collectibles,
+		EVMChainId: pallet_evm_chain_id,
+		EVM: pallet_evm,
 	}
 );
 

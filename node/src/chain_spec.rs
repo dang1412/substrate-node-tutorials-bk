@@ -1,6 +1,8 @@
 use node_template_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
 	SystemConfig, WASM_BINARY,
+	EVMConfig,
+	EVMChainIdConfig,
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -152,5 +154,9 @@ fn testnet_genesis(
 			key: Some(root_key),
 		},
 		transaction_payment: Default::default(),
+		evm_chain_id: EVMChainIdConfig { chain_id: 1 },
+		evm: EVMConfig {
+			accounts: [].into(),
+		},
 	}
 }
