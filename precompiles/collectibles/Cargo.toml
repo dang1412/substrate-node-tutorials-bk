@@ -8,7 +8,7 @@ edition = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-# frame-support = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
+# frame-support = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.38", default-features = false }
 frame-support = { workspace = true }
 # num = { version = "0.4", default-features = false, features = ["alloc"] }
 # Frontier
