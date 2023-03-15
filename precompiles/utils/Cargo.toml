@@ -38,7 +38,7 @@ pallet-evm = { workspace = true }
 
 # Polkadot / XCM
 # xcm = { git = "https://github.com/purestake/polkadot", branch = "moonbeam-polkadot-v0.9.32", default-features = false }
-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.36", default-features = false }
+xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.38", default-features = false }
 
 [dev-dependencies]
 hex-literal = "0.3.1"

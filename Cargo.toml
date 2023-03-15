@@ -3,7 +3,7 @@ members = [
     "node",
     "pallets/collectibles",
     "pallets/template",
-    # "precompiles/collectibles",
+    "precompiles/collectibles",
     # "frontier/frame/evm",
     "runtime",
 ]
