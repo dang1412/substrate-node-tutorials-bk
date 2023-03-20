@@ -506,6 +506,12 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl pallet_template_runtime_api::TemplateApi<Block> for Runtime {
+		fn get_value() -> u32 {
+			TemplateModule::get_value().unwrap_or(0)
+		}
+	}
+
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
 		fn benchmark_metadata(extra: bool) -> (
