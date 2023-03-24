@@ -158,5 +158,6 @@ fn testnet_genesis(
 		evm: EVMConfig {
 			accounts: [].into(),
 		},
+		ethereum: Default::default(),
 	}
 }

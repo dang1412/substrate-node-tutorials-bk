@@ -462,6 +462,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "beefy-merkle-tree"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
+dependencies = [
+ "sp-api",
+ "sp-beefy",
+ "sp-runtime",
+]
+
+[[package]]
 name = "bincode"
 version = "1.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -840,6 +850,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ee52072ec15386f770805afd189a01c8841be8696bed250fa2f13c4c0d6dfb7"
 dependencies = [
  "generic-array 0.14.6",
+]
+
+[[package]]
+name = "ckb-merkle-mountain-range"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "56ccb671c5921be8a84686e6212ca184cb1d7c51cadcdbfcbd1cc3f042f5dfb8"
+dependencies = [
+ "cfg-if",
 ]
 
 [[package]]
@@ -1913,6 +1932,86 @@ dependencies = [
 ]
 
 [[package]]
+name = "fc-db"
+version = "2.0.0-dev"
+dependencies = [
+ "fp-storage",
+ "futures",
+ "kvdb-rocksdb",
+ "log",
+ "parity-db",
+ "parity-scale-codec",
+ "parking_lot 0.12.1",
+ "sc-block-builder",
+ "sc-client-db",
+ "smallvec",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-core",
+ "sp-database",
+ "sp-runtime",
+ "substrate-test-runtime-client",
+ "tempfile",
+]
+
+[[package]]
+name = "fc-rpc"
+version = "2.0.0-dev"
+dependencies = [
+ "ethereum",
+ "ethereum-types",
+ "evm",
+ "fc-db",
+ "fc-rpc-core",
+ "fp-ethereum",
+ "fp-rpc",
+ "fp-storage",
+ "futures",
+ "hex",
+ "jsonrpsee",
+ "libsecp256k1",
+ "log",
+ "lru",
+ "parity-scale-codec",
+ "prometheus",
+ "rand 0.8.5",
+ "rlp",
+ "sc-block-builder",
+ "sc-client-api",
+ "sc-client-db",
+ "sc-network",
+ "sc-network-common",
+ "sc-rpc",
+ "sc-service",
+ "sc-transaction-pool",
+ "sc-transaction-pool-api",
+ "sp-api",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-storage",
+ "substrate-prometheus-endpoint",
+ "substrate-test-runtime-client",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "fc-rpc-core"
+version = "1.1.0-dev"
+dependencies = [
+ "ethereum",
+ "ethereum-types",
+ "jsonrpsee",
+ "rustc-hex",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "fdlimit"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2037,6 +2136,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "fp-consensus"
+version = "2.0.0-dev"
+dependencies = [
+ "ethereum",
+ "parity-scale-codec",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "fp-ethereum"
+version = "1.0.0-dev"
+dependencies = [
+ "ethereum",
+ "ethereum-types",
+ "fp-evm",
+ "frame-support",
+ "num_enum",
+ "parity-scale-codec",
+ "sp-std",
+]
+
+[[package]]
 name = "fp-evm"
 version = "3.0.0-dev"
 dependencies = [
@@ -2046,6 +2169,40 @@ dependencies = [
  "serde",
  "sp-core",
  "sp-std",
+]
+
+[[package]]
+name = "fp-rpc"
+version = "3.0.0-dev"
+dependencies = [
+ "ethereum",
+ "ethereum-types",
+ "fp-evm",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-api",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "fp-self-contained"
+version = "1.0.0-dev"
+dependencies = [
+ "frame-support",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-runtime",
+]
+
+[[package]]
+name = "fp-storage"
+version = "2.0.0"
+dependencies = [
+ "parity-scale-codec",
+ "serde",
 ]
 
 [[package]]
@@ -4273,12 +4430,18 @@ name = "node-template"
 version = "4.0.0-dev"
 dependencies = [
  "clap",
+ "fc-db",
+ "fc-rpc",
+ "fc-rpc-core",
+ "fp-rpc",
+ "fp-storage",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "frame-system",
  "futures",
  "jsonrpsee",
  "node-template-runtime",
+ "pallet-ethereum",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
  "sc-basic-authorship",
@@ -4289,6 +4452,7 @@ dependencies = [
  "sc-executor",
  "sc-finality-grandpa",
  "sc-keystore",
+ "sc-network",
  "sc-rpc",
  "sc-rpc-api",
  "sc-service",
@@ -4316,6 +4480,7 @@ dependencies = [
 name = "node-template-runtime"
 version = "4.0.0-dev"
 dependencies = [
+ "fp-rpc",
  "frame-benchmarking",
  "frame-executive",
  "frame-support",
@@ -4326,6 +4491,7 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-collectibles",
+ "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-chain-id",
  "pallet-evm-precompile-collectibles",
@@ -4462,6 +4628,7 @@ version = "0.5.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0629cbd6b897944899b1f10496d9c4a7ac5878d45fd61bc22e9e79bfbbc29597"
 dependencies = [
+ "proc-macro-crate",
  "proc-macro2",
  "quote",
  "syn",
@@ -4599,6 +4766,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-babe"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-authorship",
+ "pallet-session",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-application-crypto",
+ "sp-consensus-babe",
+ "sp-consensus-vrf",
+ "sp-io",
+ "sp-runtime",
+ "sp-session",
+ "sp-staking",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-balances"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
@@ -4621,6 +4812,35 @@ dependencies = [
  "frame-system",
  "parity-scale-codec",
  "scale-info",
+]
+
+[[package]]
+name = "pallet-ethereum"
+version = "4.0.0-dev"
+dependencies = [
+ "ethereum",
+ "ethereum-types",
+ "evm",
+ "fp-consensus",
+ "fp-ethereum",
+ "fp-evm",
+ "fp-rpc",
+ "fp-self-contained",
+ "fp-storage",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "libsecp256k1",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "rlp",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]
@@ -7437,6 +7657,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp-beefy"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
+dependencies = [
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-core",
+ "sp-io",
+ "sp-mmr-primitives",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "sp-block-builder"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
@@ -7503,6 +7740,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp-consensus-babe"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
+dependencies = [
+ "async-trait",
+ "merlin",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-consensus",
+ "sp-consensus-slots",
+ "sp-consensus-vrf",
+ "sp-core",
+ "sp-inherents",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-std",
+ "sp-timestamp",
+]
+
+[[package]]
 name = "sp-consensus-slots"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
@@ -7512,6 +7772,19 @@ dependencies = [
  "serde",
  "sp-std",
  "sp-timestamp",
+]
+
+[[package]]
+name = "sp-consensus-vrf"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
+dependencies = [
+ "parity-scale-codec",
+ "scale-info",
+ "schnorrkel",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]
@@ -7703,6 +7976,24 @@ source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.3
 dependencies = [
  "thiserror",
  "zstd",
+]
+
+[[package]]
+name = "sp-mmr-primitives"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
+dependencies = [
+ "ckb-merkle-mountain-range",
+ "log",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-api",
+ "sp-core",
+ "sp-debug-derive",
+ "sp-runtime",
+ "sp-std",
+ "thiserror",
 ]
 
 [[package]]
@@ -8176,6 +8467,94 @@ dependencies = [
  "sc-rpc-api",
  "serde",
  "sp-runtime",
+]
+
+[[package]]
+name = "substrate-test-client"
+version = "2.0.1"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
+dependencies = [
+ "array-bytes",
+ "async-trait",
+ "futures",
+ "parity-scale-codec",
+ "sc-client-api",
+ "sc-client-db",
+ "sc-consensus",
+ "sc-executor",
+ "sc-offchain",
+ "sc-service",
+ "serde",
+ "serde_json",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-core",
+ "sp-keyring",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-state-machine",
+]
+
+[[package]]
+name = "substrate-test-runtime"
+version = "2.0.0"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
+dependencies = [
+ "beefy-merkle-tree",
+ "cfg-if",
+ "frame-support",
+ "frame-system",
+ "frame-system-rpc-runtime-api",
+ "log",
+ "memory-db",
+ "pallet-babe",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "sc-service",
+ "scale-info",
+ "serde",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-beefy",
+ "sp-block-builder",
+ "sp-consensus-aura",
+ "sp-consensus-babe",
+ "sp-core",
+ "sp-externalities",
+ "sp-finality-grandpa",
+ "sp-inherents",
+ "sp-io",
+ "sp-keyring",
+ "sp-offchain",
+ "sp-runtime",
+ "sp-runtime-interface",
+ "sp-session",
+ "sp-state-machine",
+ "sp-std",
+ "sp-transaction-pool",
+ "sp-trie",
+ "sp-version",
+ "substrate-wasm-builder",
+ "trie-db",
+]
+
+[[package]]
+name = "substrate-test-runtime-client"
+version = "2.0.0"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#18bb7c7c841b101c19a8d1881b893ae8e37de460"
+dependencies = [
+ "futures",
+ "parity-scale-codec",
+ "sc-block-builder",
+ "sc-client-api",
+ "sc-consensus",
+ "sp-api",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-core",
+ "sp-runtime",
+ "substrate-test-client",
+ "substrate-test-runtime",
 ]
 
 [[package]]

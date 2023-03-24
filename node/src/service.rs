@@ -6,10 +6,14 @@ use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_finality_grandpa::SharedVoterState;
 use sc_keystore::LocalKeystore;
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
+use sc_service::{error::Error as ServiceError, BasePath, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
-use std::{sync::Arc, time::Duration};
+use std::{sync::Arc, collections::BTreeMap, sync::Mutex, time::Duration};
+
+// frontier
+use fc_db::DatabaseSource;
+use fc_rpc_core::types::{FeeHistoryCache, FilterPool};
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -35,6 +39,50 @@ pub(crate) type FullClient =
 	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
+
+pub fn frontier_database_dir(config: &Configuration, path: &str) -> std::path::PathBuf {
+	let config_dir = config
+		.base_path
+		.as_ref()
+		.map(|base_path| base_path.config_dir(config.chain_spec.id()))
+		.unwrap_or_else(|| {
+			BasePath::from_project("", "", "moonbeam").config_dir(config.chain_spec.id())
+		});
+	config_dir.join("frontier").join(path)
+}
+
+// TODO This is copied from frontier. It should be imported instead after
+// https://github.com/paritytech/frontier/issues/333 is solved
+pub fn open_frontier_backend<C>(
+	client: Arc<C>,
+	config: &Configuration,
+) -> Result<Arc<fc_db::Backend<Block>>, String>
+where
+	C: sp_blockchain::HeaderBackend<Block>,
+{
+	Ok(Arc::new(fc_db::Backend::<Block>::new(
+		client,
+		&fc_db::DatabaseSettings {
+			source: match config.database {
+				DatabaseSource::RocksDb { .. } => DatabaseSource::RocksDb {
+					path: frontier_database_dir(config, "db"),
+					cache_size: 0,
+				},
+				DatabaseSource::ParityDb { .. } => DatabaseSource::ParityDb {
+					path: frontier_database_dir(config, "paritydb"),
+				},
+				DatabaseSource::Auto { .. } => DatabaseSource::Auto {
+					rocksdb_path: frontier_database_dir(config, "db"),
+					paritydb_path: frontier_database_dir(config, "paritydb"),
+					cache_size: 0,
+				},
+				_ => {
+					return Err("Supported db sources: `rocksdb` | `paritydb` | `auto`".to_string())
+				}
+			},
+		},
+	)?))
+}
 
 pub fn new_partial(
 	config: &Configuration,
@@ -212,6 +260,25 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		);
 	}
 
+	// pub struct Eth<B: BlockT, C, P, CT, BE, H: ExHashT, A: ChainApi, EGA = ()> {
+	// 	pool: Arc<P>,
+	// 	graph: Arc<Pool<A>>,
+	// 	client: Arc<C>,
+	// 	convert_transaction: Option<CT>,
+	// 	network: Arc<NetworkService<B, H>>,
+	// 	is_authority: bool,
+	// 	signers: Vec<Box<dyn EthSigner>>,
+	// 	overrides: Arc<OverrideHandle<B>>,
+	// 	backend: Arc<fc_db::Backend<B>>,
+	// 	block_data_cache: Arc<EthBlockDataCacheTask<B>>,
+	// 	fee_history_cache: FeeHistoryCache,
+	// 	fee_history_cache_limit: FeeHistoryCacheLimit,
+	// 	/// When using eth_call/eth_estimateGas, the maximum allowed gas limit will be
+	// 	/// block.gas_limit * execute_gas_limit_multiplier
+	// 	execute_gas_limit_multiplier: u64,
+	// 	_marker: PhantomData<(B, BE, EGA)>,
+	// }
+
 	let role = config.role.clone();
 	let force_authoring = config.force_authoring;
 	let backoff_authoring_blocks: Option<()> = None;
@@ -219,13 +286,45 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
 
+	let overrides = crate::rpc::overrides_handle(client.clone());
+	let frontier_backend = open_frontier_backend(client.clone(), &config)?;
+	let fee_history_cache: FeeHistoryCache = Arc::new(Mutex::new(BTreeMap::new()));
+	let block_data_cache = Arc::new(fc_rpc::EthBlockDataCacheTask::new(
+		task_manager.spawn_handle(),
+		overrides.clone(),
+		50, //rpc_config.eth_log_block_cache,
+		50, //rpc_config.eth_statuses_cache,
+		prometheus_registry.clone(),
+	));
+
 	let rpc_extensions_builder = {
 		let client = client.clone();
 		let pool = transaction_pool.clone();
+		let is_authority = role.is_authority();
+		let network = network.clone();
 
 		Box::new(move |deny_unsafe, _| {
-			let deps =
-				crate::rpc::FullDeps { client: client.clone(), pool: pool.clone(), deny_unsafe };
+			// let deps =
+			// 	crate::rpc::FullDeps { client: client.clone(), pool: pool.clone(), deny_unsafe };
+			let deps = crate::rpc::FullDeps {
+				// backend: backend.clone(),
+				client: client.clone(),
+				// command_sink: None,
+				deny_unsafe,
+				// ethapi_cmd: ethapi_cmd.clone(),
+				// filter_pool: filter_pool.clone(),
+				frontier_backend: frontier_backend.clone(),
+				graph: pool.pool().clone(),
+				pool: pool.clone(),
+				is_authority,
+				max_past_logs: u32::MAX,
+				fee_history_limit: u64::MAX,
+				fee_history_cache: fee_history_cache.clone(),
+				network: network.clone(),
+				// xcm_senders: None,
+				block_data_cache: block_data_cache.clone(),
+				overrides: overrides.clone(),
+			};
 			crate::rpc::create_full(deps).map_err(Into::into)
 		})
 	};

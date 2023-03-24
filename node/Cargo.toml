@@ -48,6 +48,7 @@ jsonrpsee = { version = "0.16.2", features = ["server"] }
 sc-rpc = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
 sp-api = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
 sc-rpc-api = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
+sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
 sp-blockchain = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
 sp-block-builder = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
 sc-basic-authorship = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
@@ -57,6 +58,13 @@ pallet-transaction-payment-rpc = { version = "4.0.0-dev", git = "https://github.
 # These dependencies are used for runtime benchmarking
 frame-benchmarking = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
 frame-benchmarking-cli = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
+
+fc-rpc = { path = "../frontier/client/rpc" }
+fc-rpc-core = { path = "../frontier/client/rpc-core" }
+fc-db = { path = "../frontier/client/db" }
+fp-storage = { path = "../frontier/primitives/storage" }
+fp-rpc = { path = "../frontier/primitives/rpc" }
+pallet-ethereum = { path = "../frontier/frame/ethereum" }
 
 # Local Dependencies
 node-template-runtime = { version = "4.0.0-dev", path = "../runtime" }
